@@ -1,0 +1,65 @@
+name: stock-materials
+
+on:
+  workflow_dispatch:
+    inputs:
+      stop_source:
+        description: "stop-high source: stockmaster, yahoo, csv, or sample"
+        required: false
+        default: "stockmaster"
+      use_llm:
+        description: "set to true to use LOCAL_LLM_CMD"
+        required: false
+        default: "false"
+  schedule:
+    # 16:15 JST on weekdays. GitHub cron is UTC.
+    - cron: "15 7 * * 1-5"
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build report
+        env:
+          TZ: Asia/Tokyo
+          STOP_SOURCE: ${{ github.event.inputs.stop_source || 'stockmaster' }}
+          USE_LLM: ${{ github.event.inputs.use_llm || 'false' }}
+          # Optional example:
+          # LOCAL_LLM_CMD: "llama-cli -m ./models/model.gguf -n 512 -p {prompt}"
+        run: |
+          REPORT_DATE="$(date +%Y-%m-%d)"
+          ARGS=""
+          if [ "$USE_LLM" = "true" ]; then
+            ARGS="$ARGS --use-llm"
+          fi
+          python -m stock_materials \
+            --date "$REPORT_DATE" \
+            --stop-source "$STOP_SOURCE" \
+            --include-news \
+            --tdnet-days 3 \
+            --limit 15 \
+            --output "reports/${REPORT_DATE}.md" \
+            $ARGS
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-materials-report
+          path: reports/*.md
+
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/*.md
+          git diff --cached --quiet || git commit -m "Add stock materials report"
+          git push
