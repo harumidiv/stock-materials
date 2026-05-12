@@ -10,6 +10,7 @@ from .models import StockReport
 from .news import fetch_news_materials
 from .report import render_markdown
 from .scoring import score_materials
+from .social import build_social_references
 from .stop_high import load_stop_high
 from .tdnet import fetch_tdnet_materials
 
@@ -29,6 +30,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--limit", type=int, default=15, help="Maximum number of stocks to inspect")
     parser.add_argument("--tdnet-days", type=int, default=3, help="TDnet lookback days")
     parser.add_argument("--include-news", action="store_true", help="Also search Google News RSS")
+    parser.add_argument(
+        "--include-social",
+        action="store_true",
+        help="Add Yahoo Finance board, stock-post, and X search reference links.",
+    )
     parser.add_argument("--use-llm", action="store_true", help="Use LOCAL_LLM_CMD if available")
     parser.add_argument("--demo", action="store_true", help="Use built-in sample materials instead of network")
     parser.add_argument("--output", default="", help="Markdown output path")
@@ -52,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
                 stock=stock,
                 materials=tuple(scored),
                 summary=summarize(stock, scored, use_llm=args.use_llm),
+                social_references=tuple(build_social_references(stock)) if args.include_social else (),
             )
         )
 

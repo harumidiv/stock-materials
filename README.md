@@ -40,9 +40,12 @@ python -m stock_materials \
 python -m stock_materials \
   --stop-source stockmaster \
   --include-news \
+  --include-social \
   --tdnet-days 3 \
   --output reports/$(date +%Y-%m-%d).md
 ```
+
+`--include-social` を付けると、各銘柄に Yahoo!ファイナンス掲示板、Yahoo!ファイナンスの株つぶやき、X検索への確認リンクを追加します。投稿本文の大量取得はせず、TDnetやニュースとは別の「市場の声チェック」として出します。
 
 ## ローカルLLMを使う
 

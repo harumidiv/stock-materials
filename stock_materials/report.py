@@ -39,6 +39,12 @@ def render_markdown(target_date: date, reports: list[StockReport], source: str) 
                 )
         else:
             lines.append("- 材料候補: なし")
+
+        if report.social_references:
+            lines.append("- 市場の声チェック:")
+            for reference in report.social_references:
+                note = f" / {reference.note}" if reference.note else ""
+                lines.append(f"  - {reference.source}: {reference.title} / {reference.url}{note}")
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"

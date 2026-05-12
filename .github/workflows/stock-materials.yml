@@ -45,6 +45,7 @@ jobs:
             --date "$REPORT_DATE" \
             --stop-source "$STOP_SOURCE" \
             --include-news \
+            --include-social \
             --tdnet-days 3 \
             --limit 15 \
             --output "reports/${REPORT_DATE}.md" \

@@ -24,7 +24,16 @@ class Material:
 
 
 @dataclass(frozen=True)
+class SocialReference:
+    source: str
+    title: str
+    url: str
+    note: str = ""
+
+
+@dataclass(frozen=True)
 class StockReport:
     stock: Stock
     materials: tuple[Material, ...]
     summary: str
+    social_references: tuple[SocialReference, ...] = field(default_factory=tuple)
